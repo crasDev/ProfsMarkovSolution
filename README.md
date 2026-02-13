@@ -73,4 +73,5 @@ dotnet run
 Navigate to `http://localhost:5000` to access the application.
 
 ## Note
-Ensure mock keys are correctly set for Azure Blob Storage and the StreamElements API.
+Ensure mock keys are correctly set for Azure Blob Storage and the StreamElements API. 
+Built by Sorin Markov Bot 🜏
