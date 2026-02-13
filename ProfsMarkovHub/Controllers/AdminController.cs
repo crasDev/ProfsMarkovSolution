@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProfsMarkovHub.Data;
 using ProfsMarkovHub.Models;
+using ProfsMarkovHub.Services.Storage;
 
 namespace ProfsMarkovHub.Controllers;
 
@@ -10,31 +11,36 @@ namespace ProfsMarkovHub.Controllers;
 public class AdminController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly IAssetStorage _assetStorage;
 
-    public AdminController(ApplicationDbContext context)
+    public AdminController(ApplicationDbContext context, IAssetStorage assetStorage)
     {
         _context = context;
+        _assetStorage = assetStorage;
     }
 
-    // GET: Admin/Articles
     public async Task<IActionResult> Index()
     {
         return View(await _context.Articles.Include(a => a.Author).ToListAsync());
     }
 
-    // GET: Admin/Create
     public IActionResult Create()
     {
         return View();
     }
 
-    // POST: Admin/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,Title,Slug,Content,ImageUrl")] Article article)
+    public async Task<IActionResult> Create([Bind("Id,Title,Slug,Content,ImageUrl")] Article article, IFormFile? imageFile)
     {
         if (ModelState.IsValid)
         {
+            if (imageFile is { Length: > 0 })
+            {
+                await using var stream = imageFile.OpenReadStream();
+                article.ImageUrl = await _assetStorage.SaveAsync(stream, imageFile.FileName, imageFile.ContentType);
+            }
+
             article.PublishedAt = DateTime.UtcNow;
             article.AuthorId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             _context.Add(article);
@@ -44,7 +50,6 @@ public class AdminController : Controller
         return View(article);
     }
 
-    // GET: Admin/Edit/5
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null)
@@ -60,10 +65,9 @@ public class AdminController : Controller
         return View(article);
     }
 
-    // POST: Admin/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Slug,Content,ImageUrl,PublishedAt,AuthorId")] Article article)
+    public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Slug,Content,ImageUrl,PublishedAt,AuthorId")] Article article, IFormFile? imageFile)
     {
         if (id != article.Id)
         {
@@ -74,6 +78,12 @@ public class AdminController : Controller
         {
             try
             {
+                if (imageFile is { Length: > 0 })
+                {
+                    await using var stream = imageFile.OpenReadStream();
+                    article.ImageUrl = await _assetStorage.SaveAsync(stream, imageFile.FileName, imageFile.ContentType);
+                }
+
                 _context.Update(article);
                 await _context.SaveChangesAsync();
             }
@@ -83,17 +93,13 @@ public class AdminController : Controller
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
             return RedirectToAction(nameof(Index));
         }
         return View(article);
     }
 
-    // GET: Admin/Delete/5
     public async Task<IActionResult> Delete(int? id)
     {
         if (id == null)
@@ -112,7 +118,6 @@ public class AdminController : Controller
         return View(article);
     }
 
-    // POST: Admin/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
@@ -122,7 +127,7 @@ public class AdminController : Controller
         {
             _context.Articles.Remove(article);
         }
-        
+
         await _context.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }

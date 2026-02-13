@@ -1,0 +1,36 @@
+@model ProfsMarkovHub.ViewModels.StoreViewModel
+
+@{
+    ViewData["Title"] = "Store";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="display-6">Markov Points Store</h1>
+        <p class="text-muted mb-0">Redeem rewards from stream loyalty points.</p>
+    </div>
+</div>
+
+@if (Model.IsFallback)
+{
+    <div class="alert alert-warning glass-card" role="alert">
+        @Model.Message
+    </div>
+}
+
+<div class="row g-4">
+    @foreach (var item in Model.Items)
+    {
+        <div class="col-md-6 col-lg-4">
+            <div class="glass-card h-100 p-3">
+                <img src="@(string.IsNullOrWhiteSpace(item.ImageUrl) ? "/images/store-placeholder.svg" : item.ImageUrl)" alt="@item.Name" class="img-fluid rounded mb-3" style="max-height:220px; width:100%; object-fit:cover;" />
+                <h5>@item.Name</h5>
+                <p class="text-muted">@item.Description</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="badge bg-primary">@item.Cost.ToString("N0") pts</span>
+                    <span class="small text-muted">StreamElements</span>
+                </div>
+            </div>
+        </div>
+    }
+</div>

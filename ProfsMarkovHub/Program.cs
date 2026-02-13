@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProfsMarkovHub.Data;
+using ProfsMarkovHub.Services.Storage;
+using ProfsMarkovHub.Services.Store;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +13,26 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+builder.Services.Configure<StreamElementsOptions>(builder.Configuration.GetSection(StreamElementsOptions.SectionName));
+builder.Services.Configure<AzureBlobStorageOptions>(builder.Configuration.GetSection(AzureBlobStorageOptions.SectionName));
+
+builder.Services.AddHttpClient<IStreamElementsService, StreamElementsService>((sp, client) =>
+{
+    var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<StreamElementsOptions>>().Value;
+    client.BaseAddress = new Uri(options.BaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(12);
+});
+
+var useAzureBlob = builder.Configuration.GetValue<bool>("Storage:UseAzureBlob");
+if (useAzureBlob && !builder.Environment.IsDevelopment())
+{
+    builder.Services.AddSingleton<IAssetStorage, AzureBlobStorageService>();
+}
+else
+{
+    builder.Services.AddSingleton<IAssetStorage, LocalFallbackStorageService>();
+}
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -36,15 +58,14 @@ using (var scope = app.Services.CreateScope())
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles(); // UseStaticFiles is better than MapStaticAssets for standard MVC usually, or ensure compatibility
+app.UseStaticFiles();
 app.UseRouting();
 
-app.UseAuthentication(); // Ensure Auth middleware is present
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
@@ -55,6 +76,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.MapRazorPages(); // For Identity UI if scaffolded
+app.MapRazorPages();
 
 app.Run();
