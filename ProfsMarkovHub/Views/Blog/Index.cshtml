@@ -1,0 +1,28 @@
+@model IEnumerable<ProfsMarkovHub.Models.Article>
+
+@{
+    ViewData["Title"] = "Blog";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to Profs Markov Hub</h1>
+    <p>Latest insights and articles.</p>
+</div>
+
+<div class="blog-grid">
+    @foreach (var article in Model.OrderByDescending(a => a.PublishedAt))
+    {
+        <div class="glass-card">
+            @if (!string.IsNullOrEmpty(article.ImageUrl))
+            {
+                <img src="@article.ImageUrl" class="blog-image" alt="@article.Title" />
+            }
+            <div class="card-body">
+                <h5 class="card-title">@article.Title</h5>
+                <p class="card-text text-muted">@article.PublishedAt.ToString("MMM dd, yyyy")</p>
+                <p class="card-text">@article.Content.Substring(0, Math.Min(article.Content.Length, 100))...</p>
+                <a asp-action="Details" asp-route-id="@article.Id" class="btn btn-primary">Read More</a>
+            </div>
+        </div>
+    }
+</div>
