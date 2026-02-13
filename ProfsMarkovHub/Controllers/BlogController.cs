@@ -13,13 +13,16 @@ public class BlogController : Controller
         _context = context;
     }
 
-    // GET: Blog
     public async Task<IActionResult> Index()
     {
-        return View(await _context.Articles.Include(a => a.Author).ToListAsync());
+        ViewData["OgTitle"] = "ProfsMarkov Blog";
+        ViewData["OgDescription"] = "Latest posts, insights, and experiments from ProfsMarkov.";
+        ViewData["OgImage"] = Url.Content("~/images/hero-bg.jpg");
+        ViewData["OgUrl"] = Url.Action("Index", "Blog", null, Request.Scheme);
+
+        return View(await _context.Articles.Include(a => a.Author).OrderByDescending(a => a.PublishedAt).ToListAsync());
     }
 
-    // GET: Blog/Details/5
     public async Task<IActionResult> Details(int? id)
     {
         if (id == null)

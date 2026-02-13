@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using ProfsMarkovHub.Data;
 using ProfsMarkovHub.Models;
 
 namespace ProfsMarkovHub.Controllers;
@@ -7,15 +9,27 @@ namespace ProfsMarkovHub.Controllers;
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly ApplicationDbContext _context;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
     {
         _logger = logger;
+        _context = context;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
+        ViewData["OgTitle"] = "ProfsMarkov Hub";
+        ViewData["OgDescription"] = "AI tools, stream updates, and latest blog insights.";
+        ViewData["OgImage"] = Url.Content("~/images/hero-bg.jpg");
+        ViewData["OgUrl"] = Url.Action("Index", "Home", null, Request.Scheme);
+
+        var latest = await _context.Articles
+            .OrderByDescending(x => x.PublishedAt)
+            .Take(6)
+            .ToListAsync();
+
+        return View(latest);
     }
 
     public IActionResult Privacy()

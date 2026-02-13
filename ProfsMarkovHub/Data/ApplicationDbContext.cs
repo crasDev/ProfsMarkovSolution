@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ProfsMarkovHub.Models;
+using ProfsMarkovHub.Models.Store;
 
 namespace ProfsMarkovHub.Data;
 
@@ -14,10 +15,16 @@ public class ApplicationDbContext : IdentityDbContext
     public DbSet<Article> Articles { get; set; } = null!;
     public DbSet<Tag> Tags { get; set; } = null!;
     public DbSet<ArticleTag> ArticleTags { get; set; } = null!;
+    public DbSet<StoreItem> StoreItems { get; set; } = null!;
+    public DbSet<StoreRedemption> StoreRedemptions { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Entity<Article>()
+            .HasIndex(a => a.Slug)
+            .IsUnique();
 
         // Many-to-many relationship
         builder.Entity<ArticleTag>()
@@ -32,5 +39,13 @@ public class ApplicationDbContext : IdentityDbContext
             .HasOne(at => at.Tag)
             .WithMany(t => t.ArticleTags)
             .HasForeignKey(at => at.TagId);
+
+        builder.Entity<StoreItem>()
+            .HasIndex(s => s.ExternalId)
+            .IsUnique();
+
+        builder.Entity<StoreRedemption>()
+            .HasIndex(r => r.ExternalId)
+            .IsUnique();
     }
 }

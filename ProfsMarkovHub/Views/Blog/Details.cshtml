@@ -1,0 +1,27 @@
+@model ProfsMarkovHub.Models.Article
+
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["OgTitle"] = Model.Title;
+    ViewData["OgDescription"] = (Model.Content.Length > 180 ? Model.Content[..180] + "..." : Model.Content);
+    ViewData["OgImage"] = string.IsNullOrWhiteSpace(Model.ImageUrl) ? Url.Content("~/images/hero-bg.jpg") : Model.ImageUrl;
+    ViewData["OgUrl"] = Url.Action("Details", "Blog", new { id = Model.Id }, Context.Request.Scheme);
+}
+
+<article class="glass-card p-4">
+    <h1>@Model.Title</h1>
+    <p class="text-muted">@Model.PublishedAt.ToString("MMM dd, yyyy")</p>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+    {
+        <img src="@Model.ImageUrl" alt="@Model.Title" class="img-fluid rounded mb-4" />
+    }
+
+    <div class="mb-4" style="white-space: pre-wrap;">@Model.Content</div>
+
+    @await Html.PartialAsync("~/Views/Shared/Components/_ShareLinks.cshtml", new ProfsMarkovHub.ViewModels.ShareLinksViewModel
+    {
+        Title = Model.Title,
+        Url = Url.Action("Details", "Blog", new { id = Model.Id }, Context.Request.Scheme) ?? string.Empty
+    })
+</article>

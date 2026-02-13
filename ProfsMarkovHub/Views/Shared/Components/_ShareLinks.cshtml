@@ -1,0 +1,14 @@
+@model ProfsMarkovHub.ViewModels.ShareLinksViewModel
+@{
+    var encodedUrl = Uri.EscapeDataString(Model.Url);
+    var encodedTitle = Uri.EscapeDataString(Model.Title);
+}
+
+<div class="glass-card p-3 mt-4">
+    <strong class="d-block mb-2">Share</strong>
+    <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener noreferrer" href="https://x.com/intent/tweet?url=@encodedUrl&text=@encodedTitle">X</a>
+        <a class="btn btn-sm btn-outline-info" target="_blank" rel="noopener noreferrer" href="https://bsky.app/intent/compose?text=@encodedTitle%20@encodedUrl">Bluesky</a>
+        <a class="btn btn-sm btn-outline-secondary" target="_blank" rel="noopener noreferrer" href="https://www.reddit.com/submit?url=@encodedUrl&title=@encodedTitle">Reddit</a>
+    </div>
+</div>
