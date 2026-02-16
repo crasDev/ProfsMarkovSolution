@@ -41,58 +41,73 @@ public static class DbInitializer
                 }
             }
 
-            // Seed Sample Articles
+            // Seed Sample Articles based on current Level Up / content pipeline
             if (!context.Articles.Any())
             {
-                var aiToolsArticle = new Article
+                var now = DateTime.UtcNow;
+
+                var articles = new List<Article>
                 {
-                    Title = "5 AI Tools Every Developer Should Use in 2026",
-                    Slug = "5-ai-tools-developers-2026",
-                    Content = @"# 5 AI Tools Every Developer Should Use in 2026
+                    new Article
+                    {
+                        Title = "Diablo Warlock Triple Reveal + D2R Steam Launch",
+                        Slug = "diablo-warlock-triple-reveal-d2r-steam-launch",
+                        Content = @"# Diablo Warlock Triple Reveal + D2R Steam Launch
 
-**Meta Description:** Discover 5 essential AI tools that transform developer productivity in 2026. Real-world demos, code examples, and metrics from building SyncTaskPro.
+This is a test seed article mirroring the Level Up content pipeline. In the real workflow the full script lives in content-drafts/2026-02-16_Diablo_Warlock_Triple_Reveal_D2R_Steam_Launch_blog.md.
 
-## Introduction
+Use this post to validate routing, markdown rendering and card layouts.",
+                        PublishedAt = now.AddDays(-1),
+                        AuthorId = adminUser?.Id,
+                        ImageUrl = "https://picsum.photos/id/1015/800/400"
+                    },
+                    new Article
+                    {
+                        Title = "Sony State of Play 2026 – Winners & Losers",
+                        Slug = "sony-state-of-play-2026-winners-and-losers",
+                        Content = @"# Sony State of Play 2026 – Winners & Losers
 
-The AI tool landscape is overwhelming. Every week, a new 'revolutionary' coding assistant launches. I've tested over 20 AI tools while building SyncTaskPro, my SaaS project management tool.
+Seed article for testing blog listing, detail pages and tag ribbons. Represents the real State of Play breakdown used in social + blog drafts.",
+                        PublishedAt = now.AddHours(-12),
+                        AuthorId = adminUser?.Id,
+                        ImageUrl = "https://picsum.photos/id/1025/800/400"
+                    },
+                    new Article
+                    {
+                        Title = "Steam Reviews Now Show PC Specs – Why It Matters",
+                        Slug = "steam-reviews-now-show-pc-specs",
+                        Content = @"# Steam Reviews Now Show PC Specs – Why It Matters
 
-Only 5 made it to my daily workflow.
+This article is a short test version of the real blog draft that explains why seeing hardware next to reviews changes how you read performance complaints.",
+                        PublishedAt = now,
+                        AuthorId = adminUser?.Id,
+                        ImageUrl = "https://picsum.photos/id/1040/800/400"
+                    },
+                    new Article
+                    {
+                        Title = "Steam Machine vs RAM Crisis",
+                        Slug = "steam-machine-vs-ram-crisis",
+                        Content = @"# Steam Machine vs RAM Crisis
 
-## 1. GitHub Copilot - Your AI Pair Programmer
+Seed post representing the discussion about launchers, overlays and how much RAM gets burned before you even launch a game.",
+                        PublishedAt = now.AddHours(-6),
+                        AuthorId = adminUser?.Id,
+                        ImageUrl = "https://picsum.photos/id/1043/800/400"
+                    },
+                    new Article
+                    {
+                        Title = "120 AI Tools That Redefine How Developers Work",
+                        Slug = "120-ai-tools-that-redefine-how-developers-work",
+                        Content = @"# 120 AI Tools That Redefine How Developers Work
 
-**What it does:** Context-aware code completion powered by OpenAI Codex.
-
-**Why it's essential:**
-- Suggests entire functions from comments
-- Learns your coding style within hours
-- Works offline (cached suggestions)
-
-## 2. ChatGPT/Claude - The Debug Partner
-
-**What it does:** Natural language interface for problem-solving, debugging, and architecture discussions.
-
-## 3. Cursor - The AI-First Code Editor
-
-**What it does:** VS Code fork with deep AI integration.
-
-## 4. v0.dev - From Design to Code in Minutes
-
-**What it does:** Generate React/Next.js components from text descriptions or screenshots.
-
-## 5. Phind - The Developer Search Engine
-
-**What it does:** AI-powered search optimized for code questions.
-
-## Conclusion
-
-AI tools won't replace developers in 2026. They'll replace developers who don't use AI tools.
-",
-                    PublishedAt = DateTime.UtcNow,
-                    AuthorId = adminUser?.Id,
-                    ImageUrl = "https://picsum.photos/id/237/800/400"
+Seed version of the long-form article. Use it to confirm pagination, reading experience and typography for bigger guides.",
+                        PublishedAt = now.AddDays(-2),
+                        AuthorId = adminUser?.Id,
+                        ImageUrl = "https://picsum.photos/id/1062/800/400"
+                    }
                 };
 
-                context.Articles.Add(aiToolsArticle);
+                context.Articles.AddRange(articles);
 
                 await context.SaveChangesAsync();
             }
