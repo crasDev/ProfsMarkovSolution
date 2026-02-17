@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ProfsMarkovHub.Data;
 using ProfsMarkovHub.Models;
 using ProfsMarkovHub.Services.Storage;
+using ProfsMarkovHub.ViewModels;
 
 namespace ProfsMarkovHub.Controllers;
 
@@ -21,100 +22,116 @@ public class AdminController : Controller
 
     public async Task<IActionResult> Index()
     {
-        return View(await _context.Articles.Include(a => a.Author).ToListAsync());
+        var articles = await _context.Articles
+            .Include(a => a.Author)
+            .Include(a => a.ArticleTags).ThenInclude(at => at.Tag)
+            .OrderByDescending(a => a.PublishedAt)
+            .ToListAsync();
+        return View(articles);
     }
 
     public IActionResult Create()
     {
-        return View();
+        return View(new ArticleFormViewModel());
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,Title,Slug,Content,ImageUrl")] Article article, IFormFile? imageFile)
+    public async Task<IActionResult> Create(ArticleFormViewModel vm, IFormFile? imageFile)
     {
-        if (ModelState.IsValid)
-        {
-            if (imageFile is { Length: > 0 })
-            {
-                await using var stream = imageFile.OpenReadStream();
-                article.ImageUrl = await _assetStorage.SaveAsync(stream, imageFile.FileName, imageFile.ContentType);
-            }
+        if (!ModelState.IsValid)
+            return View(vm);
 
-            article.PublishedAt = DateTime.UtcNow;
-            article.AuthorId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            _context.Add(article);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+        var article = new Article
+        {
+            Title = vm.Title,
+            Slug = vm.Slug,
+            Content = vm.Content,
+            Excerpt = vm.Excerpt,
+            ImageUrl = vm.ImageUrl,
+            PublishedAt = DateTime.UtcNow,
+            AuthorId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+        };
+
+        if (imageFile is { Length: > 0 })
+        {
+            await using var stream = imageFile.OpenReadStream();
+            article.ImageUrl = await _assetStorage.SaveAsync(stream, imageFile.FileName, imageFile.ContentType);
         }
-        return View(article);
+
+        _context.Articles.Add(article);
+        await _context.SaveChangesAsync();
+
+        await SyncTags(article.Id, vm.TagsCsv);
+
+        return RedirectToAction(nameof(Index));
     }
 
     public async Task<IActionResult> Edit(int? id)
     {
-        if (id == null)
-        {
-            return NotFound();
-        }
+        if (id == null) return NotFound();
 
-        var article = await _context.Articles.FindAsync(id);
-        if (article == null)
+        var article = await _context.Articles
+            .Include(a => a.ArticleTags).ThenInclude(at => at.Tag)
+            .FirstOrDefaultAsync(a => a.Id == id);
+
+        if (article == null) return NotFound();
+
+        var vm = new ArticleFormViewModel
         {
-            return NotFound();
-        }
-        return View(article);
+            Id = article.Id,
+            Title = article.Title,
+            Slug = article.Slug,
+            Content = article.Content,
+            Excerpt = article.Excerpt,
+            ImageUrl = article.ImageUrl,
+            PublishedAt = article.PublishedAt,
+            AuthorId = article.AuthorId,
+            TagsCsv = string.Join(", ", article.ArticleTags.Select(at => at.Tag?.Name ?? ""))
+        };
+
+        return View(vm);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Slug,Content,ImageUrl,PublishedAt,AuthorId")] Article article, IFormFile? imageFile)
+    public async Task<IActionResult> Edit(int id, ArticleFormViewModel vm, IFormFile? imageFile)
     {
-        if (id != article.Id)
+        if (id != vm.Id) return NotFound();
+        if (!ModelState.IsValid) return View(vm);
+
+        var article = await _context.Articles.FindAsync(id);
+        if (article == null) return NotFound();
+
+        article.Title = vm.Title;
+        article.Slug = vm.Slug;
+        article.Content = vm.Content;
+        article.Excerpt = vm.Excerpt;
+        article.ImageUrl = vm.ImageUrl;
+        article.PublishedAt = vm.PublishedAt;
+        article.AuthorId = vm.AuthorId;
+
+        if (imageFile is { Length: > 0 })
         {
-            return NotFound();
+            await using var stream = imageFile.OpenReadStream();
+            article.ImageUrl = await _assetStorage.SaveAsync(stream, imageFile.FileName, imageFile.ContentType);
         }
 
-        if (ModelState.IsValid)
-        {
-            try
-            {
-                if (imageFile is { Length: > 0 })
-                {
-                    await using var stream = imageFile.OpenReadStream();
-                    article.ImageUrl = await _assetStorage.SaveAsync(stream, imageFile.FileName, imageFile.ContentType);
-                }
+        await _context.SaveChangesAsync();
+        await SyncTags(article.Id, vm.TagsCsv);
 
-                _context.Update(article);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ArticleExists(article.Id))
-                {
-                    return NotFound();
-                }
-                throw;
-            }
-            return RedirectToAction(nameof(Index));
-        }
-        return View(article);
+        return RedirectToAction(nameof(Index));
     }
 
     public async Task<IActionResult> Delete(int? id)
     {
-        if (id == null)
-        {
-            return NotFound();
-        }
+        if (id == null) return NotFound();
 
         var article = await _context.Articles
             .Include(a => a.Author)
             .FirstOrDefaultAsync(m => m.Id == id);
-        if (article == null)
-        {
-            return NotFound();
-        }
 
+        if (article == null) return NotFound();
         return View(article);
     }
 
@@ -126,14 +143,44 @@ public class AdminController : Controller
         if (article != null)
         {
             _context.Articles.Remove(article);
+            await _context.SaveChangesAsync();
         }
-
-        await _context.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
     }
 
-    private bool ArticleExists(int id)
+    // ---- Helpers ----
+
+    private async Task SyncTags(int articleId, string? tagsCsv)
     {
-        return _context.Articles.Any(e => e.Id == id);
+        // Remove existing
+        var existing = await _context.ArticleTags.Where(at => at.ArticleId == articleId).ToListAsync();
+        _context.ArticleTags.RemoveRange(existing);
+
+        if (string.IsNullOrWhiteSpace(tagsCsv))
+        {
+            await _context.SaveChangesAsync();
+            return;
+        }
+
+        var tagNames = tagsCsv
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        foreach (var name in tagNames)
+        {
+            var slug = name.ToLowerInvariant().Replace(' ', '-');
+            var tag = await _context.Tags.FirstOrDefaultAsync(t => t.Slug == slug);
+            if (tag == null)
+            {
+                tag = new Tag { Name = name, Slug = slug };
+                _context.Tags.Add(tag);
+                await _context.SaveChangesAsync();
+            }
+
+            _context.ArticleTags.Add(new ArticleTag { ArticleId = articleId, TagId = tag.Id });
+        }
+
+        await _context.SaveChangesAsync();
     }
 }

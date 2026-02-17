@@ -47,6 +47,21 @@
                                 @(article.Content.Length > 120 ? article.Content[..120] + "..." : article.Content)
                             }
                         </p>
+                        @if (article.ArticleTags?.Any() == true)
+                        {
+                            <div class="blog-tags">
+                                @foreach (var at in article.ArticleTags)
+                                {
+                                    <span class="tag-pill">@at.Tag?.Name</span>
+                                }
+                            </div>
+                        }
+                        @if (article.Author != null)
+                        {
+                            <div class="blog-author">
+                                <span>by @article.Author.UserName</span>
+                            </div>
+                        }
                     </div>
                 </div>
             </a>

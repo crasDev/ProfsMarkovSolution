@@ -25,6 +25,8 @@ public class HomeController : Controller
         ViewData["OgUrl"] = Url.Action("Index", "Home", null, Request.Scheme);
 
         var latest = await _context.Articles
+            .Include(a => a.Author)
+            .Include(a => a.ArticleTags).ThenInclude(at => at.Tag)
             .OrderByDescending(x => x.PublishedAt)
             .Take(6)
             .ToListAsync();
