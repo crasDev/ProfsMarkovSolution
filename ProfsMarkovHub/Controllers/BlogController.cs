@@ -1,46 +1,48 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ProfsMarkovHub.Data;
+using ProfsMarkovHub.Helpers;
+using System.Linq;
+using ProfsMarkovHub.Models;
 
-namespace ProfsMarkovHub.Controllers;
-
-public class BlogController : Controller
+namespace ProfsMarkovHub.Controllers
 {
-    private readonly ApplicationDbContext _context;
-
-    public BlogController(ApplicationDbContext context)
+    public class BlogController : Controller
     {
-        _context = context;
-    }
-
-    public async Task<IActionResult> Index()
-    {
-        ViewData["OgTitle"] = "ProfsMarkov Blog";
-        ViewData["OgDescription"] = "Latest posts, insights, and experiments from ProfsMarkov.";
-        ViewData["OgImage"] = Url.Content("~/images/hero-bg.jpg");
-        ViewData["OgUrl"] = Url.Action("Index", "Blog", null, Request.Scheme);
-
-        return View(await _context.Articles.Include(a => a.Author).OrderByDescending(a => a.PublishedAt).ToListAsync());
-    }
-
-    public async Task<IActionResult> Details(int? id)
-    {
-        if (id == null)
+        public async Task<IActionResult> Details(string slug)
         {
-            return NotFound();
+            var article = await _context.Articles
+                .Include(a => a.Tags)
+                .FirstOrDefaultAsync(a => a.Slug == slug);
+
+            if (article == null)
+            {
+                return NotFound();
+            }
+
+            article.Content = MarkdownHelper.ToHtml(article.Content);
+            return View(article);
         }
 
-        var article = await _context.Articles
-            .Include(a => a.Author)
-            .Include(a => a.ArticleTags)
-                .ThenInclude(at => at.Tag)
-            .FirstOrDefaultAsync(m => m.Id == id);
-
-        if (article == null)
+        [HttpPost]
+        public async Task<IActionResult> Create([Bind("Title,Content,Tags")] Article article)
         {
-            return NotFound();
+            if (ModelState.IsValid)
+            {
+                article.Slug = GenerateSlug(article.Title);
+                article.Excerpt = GenerateExcerpt(article.Content);
+                _context.Add(article);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(article);
         }
 
-        return View(article);
+        private string GenerateSlug(string title) => title.ToLower().Replace(" ", "-").Replace(".", "");
+
+        private string GenerateExcerpt(string content)
+        {
+            var plainText = MarkdownHelper.ToHtml(content);
+            return new string(plainText.Take(200).ToArray());
+        }
     }
 }

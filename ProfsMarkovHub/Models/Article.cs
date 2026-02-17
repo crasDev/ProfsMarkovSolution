@@ -26,4 +26,7 @@ public class Article
     public string? ImageUrl { get; set; }
 
     public ICollection<ArticleTag> ArticleTags { get; set; } = new List<ArticleTag>();
+
+    [MaxLength(200)]
+    public string Excerpt { get; set; } = string.Empty;
 }

@@ -18,7 +18,7 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(145deg, rgba(0,102,255,0.7), rgba(0,204,102,0.7)); box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 -4px 6px rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
+        <nav class="navbar navbar-expand-lg navbar-dark glass-navbar">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">ProfsMarkovHub</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,11 +45,17 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted mt-4">
+    <footer class="site-footer">
         <div class="container">
-            &copy; 2026 - ProfsMarkovHub - <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <p>&copy; 2026 - ProfsMarkovHub</p>
+            <ul class="footer-links">
+                <li><a asp-controller="Home" asp-action="Privacy">Privacy Policy</a></li>
+                <li><a href="https://twitter.com/profs_markov">Twitter</a></li>
+                <li><a href="https://www.twitch.tv/profs_markov">Twitch</a></li>
+                <li><a href="https://github.com/profsmarkov">GitHub</a></li>
+            </ul>
         </div>
-    </footer>
+</footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
