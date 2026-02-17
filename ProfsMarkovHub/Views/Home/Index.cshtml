@@ -4,28 +4,35 @@
     ViewData["Title"] = "Home";
 }
 
-<div class="hero" style="background-image: linear-gradient(145deg, rgba(0,102,255,0.3), rgba(0,204,102,0.15)), url('/images/hero-bg.jpg'); background-size: cover; background-position: center;">
-    <h1>ProfsMarkov Hub</h1>
-    <p>Gaming reviews, tech deep-dives, and code experiments — live on Twitch.</p>
-    <div class="mt-3">
+<div class="hero">
+    <div id="particles-js"></div>
+    <h1 data-aos="fade-down" data-aos-duration="1000">ProfsMarkov Hub</h1>
+    <div class="typed-tagline" data-aos="fade-up" data-aos-delay="300">
+        <span id="typed-tagline"></span>
+    </div>
+    <div class="hero-buttons" data-aos="fade-up" data-aos-delay="600">
         <a href="https://www.twitch.tv/profs_markov" target="_blank" class="btn btn-primary me-2">🎮 Watch Live</a>
         <a asp-controller="Blog" asp-action="Index" class="btn btn-outline-light">📝 Read Blog</a>
     </div>
+    <div class="scroll-indicator">▼</div>
 </div>
 
 <section class="mb-5">
-    <h2 class="text-center mb-4" style="font-weight: 700; letter-spacing: -0.5px;">Latest Posts</h2>
+    <h2 class="text-center mb-4" data-aos="fade-up" style="font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Latest Posts</h2>
     <div class="blog-grid">
+        @{ var delay = 0; }
         @foreach (var article in Model)
         {
             var wordCount = article.Content.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
             var readingTime = Math.Max(1, wordCount / 200);
 
-            <a asp-controller="Blog" asp-action="DetailsBySlug" asp-route-slug="@article.Slug" class="blog-card-link">
+            <a asp-controller="Blog" asp-action="DetailsBySlug" asp-route-slug="@article.Slug" class="blog-card-link" data-aos="fade-up" data-aos-delay="@delay">
                 <div class="glass-card blog-card">
                     @if (!string.IsNullOrWhiteSpace(article.ImageUrl))
                     {
-                        <img src="@article.ImageUrl" class="blog-image" alt="@article.Title" />
+                        <div class="blog-image-wrap">
+                            <img src="@article.ImageUrl" class="blog-image" alt="@article.Title" />
+                        </div>
                     }
                     else
                     {
@@ -65,6 +72,7 @@
                     </div>
                 </div>
             </a>
+            delay += 100;
         }
     </div>
 </section>

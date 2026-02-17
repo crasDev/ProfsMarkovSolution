@@ -5,29 +5,33 @@
 }
 
 <div class="blog-header text-center mb-5">
-    <h1 class="display-4">Blog</h1>
-    <p class="lead text-muted-custom">Latest insights, reviews, and deep dives.</p>
+    <div id="particles-js"></div>
+    <h1 data-aos="fade-down" class="display-4">Blog</h1>
+    <p class="lead text-muted-custom" data-aos="fade-up" data-aos-delay="200">Latest insights, reviews, and deep dives.</p>
 </div>
 
 @if (!string.IsNullOrWhiteSpace(Model.TagFilter))
 {
-    <div class="text-center mb-4">
+    <div class="text-center mb-4" data-aos="fade-in">
         <span class="tag-pill tag-active">@Model.TagFilter</span>
         <a asp-action="Index" class="btn btn-sm btn-outline-light ms-2">✕ Clear filter</a>
     </div>
 }
 
 <div class="blog-grid">
+    @{ var delay = 0; }
     @foreach (var article in Model.Articles)
     {
         var wordCount = article.Content.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
         var readingTime = Math.Max(1, wordCount / 200);
 
-        <a asp-action="DetailsBySlug" asp-route-slug="@article.Slug" class="blog-card-link">
+        <a asp-action="DetailsBySlug" asp-route-slug="@article.Slug" class="blog-card-link" data-aos="fade-up" data-aos-delay="@delay">
             <div class="glass-card blog-card">
                 @if (!string.IsNullOrEmpty(article.ImageUrl))
                 {
-                    <img src="@article.ImageUrl" class="blog-image" alt="@article.Title" />
+                    <div class="blog-image-wrap">
+                        <img src="@article.ImageUrl" class="blog-image" alt="@article.Title" />
+                    </div>
                 }
                 else
                 {
@@ -70,12 +74,13 @@
                 </div>
             </div>
         </a>
+        delay += 100;
     }
 </div>
 
 @if (Model.TotalPages > 1)
 {
-    <nav aria-label="Blog pagination" class="mt-5">
+    <nav aria-label="Blog pagination" class="mt-5" data-aos="fade-up">
         <ul class="pagination justify-content-center">
             <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
                 <a class="page-link" asp-action="Index"

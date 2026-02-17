@@ -22,13 +22,24 @@
     <meta name="twitter:description" content="@(ViewData["OgDescription"] ?? "Gaming, tech, and code — by ProfsMarkov")" />
     <meta name="twitter:image" content="@(ViewData["OgImage"] ?? Url.Content("~/images/hero-bg.jpg"))" />
 
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Titillium+Web:wght@200;300;400;600;700;900&display=swap" rel="stylesheet">
+
+    <!-- AOS - Animate On Scroll -->
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/liquid_theme.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ProfsMarkovHub.styles.css" asp-append-version="true" />
 </head>
 <body>
+    <!-- Reading progress bar (shown on article pages) -->
+    <div id="reading-progress" style="width:0%; display:none;"></div>
+
     <header>
-        <nav class="navbar navbar-expand-lg navbar-glass">
+        <nav class="navbar navbar-expand-lg navbar-glass" id="mainNav">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">ProfsMarkov</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,6 +81,14 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- particles.js -->
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <!-- Typed.js -->
+    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.16/dist/typed.umd.js"></script>
+    <!-- AOS -->
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

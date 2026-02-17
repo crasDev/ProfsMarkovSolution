@@ -4,34 +4,63 @@
     ViewData["Title"] = Model.Title;
 }
 
-<article class="blog-article glass-card p-4 p-md-5">
-    <header class="blog-article-header mb-4">
-        <h1 class="blog-article-title">@Model.Title</h1>
-        <div class="blog-article-meta">
-            <span class="blog-date">@Model.PublishedAt.ToString("MMMM dd, yyyy")</span>
-            @if (ViewData["ReadingTime"] != null)
-            {
-                <span class="blog-reading-time">@ViewData["ReadingTime"] min read</span>
-            }
-            @if (Model.Author != null)
-            {
-                <span class="blog-author-name">by @Model.Author.UserName</span>
-            }
-        </div>
-        @if (Model.ArticleTags?.Any() == true)
-        {
-            <div class="blog-tags mt-2">
-                @foreach (var at in Model.ArticleTags)
+@if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+{
+    <div class="article-hero-banner" style="background-image: url('@Model.ImageUrl');">
+        <div class="container">
+            <div class="blog-article" data-aos="fade-up">
+                <h1 class="blog-article-title">@Model.Title</h1>
+                <div class="blog-article-meta">
+                    <span class="blog-date">@Model.PublishedAt.ToString("MMMM dd, yyyy")</span>
+                    @if (ViewData["ReadingTime"] != null)
+                    {
+                        <span class="blog-reading-time">@ViewData["ReadingTime"] min read</span>
+                    }
+                    @if (Model.Author != null)
+                    {
+                        <span class="blog-author-name">by @Model.Author.UserName</span>
+                    }
+                </div>
+                @if (Model.ArticleTags?.Any() == true)
                 {
-                    <span class="tag-pill">@at.Tag?.Name</span>
+                    <div class="blog-tags mt-2">
+                        @foreach (var at in Model.ArticleTags)
+                        {
+                            <span class="tag-pill">@at.Tag?.Name</span>
+                        }
+                    </div>
                 }
             </div>
-        }
-    </header>
+        </div>
+    </div>
+}
 
-    @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+<article class="blog-article glass-card p-4 p-md-5" data-aos="fade-up" data-aos-delay="200">
+    @if (string.IsNullOrWhiteSpace(Model.ImageUrl))
     {
-        <img src="@Model.ImageUrl" alt="@Model.Title" class="blog-hero-image img-fluid rounded mb-4" />
+        <header class="blog-article-header mb-4">
+            <h1 class="blog-article-title">@Model.Title</h1>
+            <div class="blog-article-meta">
+                <span class="blog-date">@Model.PublishedAt.ToString("MMMM dd, yyyy")</span>
+                @if (ViewData["ReadingTime"] != null)
+                {
+                    <span class="blog-reading-time">@ViewData["ReadingTime"] min read</span>
+                }
+                @if (Model.Author != null)
+                {
+                    <span class="blog-author-name">by @Model.Author.UserName</span>
+                }
+            </div>
+            @if (Model.ArticleTags?.Any() == true)
+            {
+                <div class="blog-tags mt-2">
+                    @foreach (var at in Model.ArticleTags)
+                    {
+                        <span class="tag-pill">@at.Tag?.Name</span>
+                    }
+                </div>
+            }
+        </header>
     }
 
     <div class="blog-content">
@@ -45,7 +74,7 @@
         }
     </div>
 
-    <hr class="my-4" style="border-color: rgba(255,255,255,0.1);" />
+    <hr class="my-4" style="border-color: rgba(255,255,255,0.06);" />
 
     @await Html.PartialAsync("~/Views/Shared/Components/_ShareLinks.cshtml", new ProfsMarkovHub.ViewModels.ShareLinksViewModel
     {
@@ -54,6 +83,6 @@
     })
 </article>
 
-<div class="text-center mt-4">
+<div class="text-center mt-4" data-aos="fade-up" data-aos-delay="400">
     <a asp-action="Index" class="btn btn-outline-light">← Back to Blog</a>
 </div>
