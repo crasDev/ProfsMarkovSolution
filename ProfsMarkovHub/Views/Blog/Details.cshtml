@@ -2,26 +2,58 @@
 
 @{
     ViewData["Title"] = Model.Title;
-    ViewData["OgTitle"] = Model.Title;
-    ViewData["OgDescription"] = (Model.Content.Length > 180 ? Model.Content[..180] + "..." : Model.Content);
-    ViewData["OgImage"] = string.IsNullOrWhiteSpace(Model.ImageUrl) ? Url.Content("~/images/hero-bg.jpg") : Model.ImageUrl;
-    ViewData["OgUrl"] = Url.Action("Details", "Blog", new { id = Model.Id }, Context.Request.Scheme);
 }
 
-<article class="glass-card p-4">
-    <h1>@Model.Title</h1>
-    <p class="text-muted">@Model.PublishedAt.ToString("MMM dd, yyyy")</p>
+<article class="blog-article glass-card p-4 p-md-5">
+    <header class="blog-article-header mb-4">
+        <h1 class="blog-article-title">@Model.Title</h1>
+        <div class="blog-article-meta">
+            <span class="blog-date">@Model.PublishedAt.ToString("MMMM dd, yyyy")</span>
+            @if (ViewData["ReadingTime"] != null)
+            {
+                <span class="blog-reading-time">@ViewData["ReadingTime"] min read</span>
+            }
+            @if (Model.Author != null)
+            {
+                <span class="blog-author-name">by @Model.Author.UserName</span>
+            }
+        </div>
+        @if (Model.ArticleTags?.Any() == true)
+        {
+            <div class="blog-tags mt-2">
+                @foreach (var at in Model.ArticleTags)
+                {
+                    <span class="tag-pill">@at.Tag?.Name</span>
+                }
+            </div>
+        }
+    </header>
 
     @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
     {
-        <img src="@Model.ImageUrl" alt="@Model.Title" class="img-fluid rounded mb-4" />
+        <img src="@Model.ImageUrl" alt="@Model.Title" class="blog-hero-image img-fluid rounded mb-4" />
     }
 
-    <div class="mb-4" style="white-space: pre-wrap;">@Model.Content</div>
+    <div class="blog-content">
+        @if (ViewData["RenderedContent"] != null)
+        {
+            @Html.Raw(ViewData["RenderedContent"])
+        }
+        else
+        {
+            <div style="white-space: pre-wrap;">@Model.Content</div>
+        }
+    </div>
+
+    <hr class="my-4" style="border-color: rgba(255,255,255,0.1);" />
 
     @await Html.PartialAsync("~/Views/Shared/Components/_ShareLinks.cshtml", new ProfsMarkovHub.ViewModels.ShareLinksViewModel
     {
         Title = Model.Title,
-        Url = Url.Action("Details", "Blog", new { id = Model.Id }, Context.Request.Scheme) ?? string.Empty
+        Url = Url.Action("DetailsBySlug", "Blog", new { slug = Model.Slug }, Context.Request.Scheme) ?? string.Empty
     })
 </article>
+
+<div class="text-center mt-4">
+    <a asp-action="Index" class="btn btn-outline-light">← Back to Blog</a>
+</div>
