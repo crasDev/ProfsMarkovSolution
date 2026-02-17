@@ -1,4 +1,4 @@
-@model IEnumerable<ProfsMarkovHub.Models.Article>
+@model ProfsMarkovHub.ViewModels.BlogIndexViewModel
 
 @{
     ViewData["Title"] = "Blog";
@@ -9,8 +9,16 @@
     <p class="lead text-muted-custom">Latest insights, reviews, and deep dives.</p>
 </div>
 
+@if (!string.IsNullOrWhiteSpace(Model.TagFilter))
+{
+    <div class="text-center mb-4">
+        <span class="tag-pill tag-active">@Model.TagFilter</span>
+        <a asp-action="Index" class="btn btn-sm btn-outline-light ms-2">✕ Clear filter</a>
+    </div>
+}
+
 <div class="blog-grid">
-    @foreach (var article in Model)
+    @foreach (var article in Model.Articles)
     {
         var wordCount = article.Content.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
         var readingTime = Math.Max(1, wordCount / 200);
@@ -48,7 +56,8 @@
                         <div class="blog-tags">
                             @foreach (var at in article.ArticleTags)
                             {
-                                <span class="tag-pill">@at.Tag?.Name</span>
+                                <a asp-action="Index" asp-route-tag="@at.Tag?.Name"
+                                   class="tag-pill" onclick="event.stopPropagation();">@at.Tag?.Name</a>
                             }
                         </div>
                     }
@@ -63,3 +72,31 @@
         </a>
     }
 </div>
+
+@if (Model.TotalPages > 1)
+{
+    <nav aria-label="Blog pagination" class="mt-5">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                <a class="page-link" asp-action="Index"
+                   asp-route-page="@(Model.CurrentPage - 1)"
+                   asp-route-tag="@Model.TagFilter">← Newer</a>
+            </li>
+
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-page="@i"
+                       asp-route-tag="@Model.TagFilter">@i</a>
+                </li>
+            }
+
+            <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                <a class="page-link" asp-action="Index"
+                   asp-route-page="@(Model.CurrentPage + 1)"
+                   asp-route-tag="@Model.TagFilter">Older →</a>
+            </li>
+        </ul>
+    </nav>
+}

@@ -534,3 +534,31 @@ a:hover {
     background: var(--primary);
     color: white;
 }
+
+/* ── Pagination ── */
+.pagination .page-link {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #e0e0e0;
+    backdrop-filter: blur(8px);
+}
+.pagination .page-link:hover {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+}
+.pagination .page-item.active .page-link {
+    background: rgba(138,180,248,0.25);
+    border-color: rgba(138,180,248,0.4);
+    color: #8ab4f8;
+}
+.pagination .page-item.disabled .page-link {
+    background: rgba(255,255,255,0.02);
+    color: rgba(255,255,255,0.3);
+}
+
+/* ── Tag filter ── */
+.tag-active {
+    background: rgba(138,180,248,0.25) !important;
+    border-color: rgba(138,180,248,0.4) !important;
+    color: #8ab4f8 !important;
+}

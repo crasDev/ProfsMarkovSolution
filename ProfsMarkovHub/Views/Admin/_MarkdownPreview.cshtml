@@ -1,0 +1,36 @@
+@* Markdown live preview panel — include after the Content textarea *@
+<div class="form-group mb-3">
+    <button type="button" class="btn btn-sm btn-outline-light" id="togglePreview">👁 Toggle Preview</button>
+</div>
+<div id="markdownPreview" class="glass-card p-4 mb-3" style="display:none; min-height:200px;">
+    <h5 class="text-muted mb-3">Preview</h5>
+    <div id="previewContent" class="markdown-body"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+(function() {
+    const textarea = document.getElementById('Content');
+    const preview = document.getElementById('markdownPreview');
+    const previewContent = document.getElementById('previewContent');
+    const toggleBtn = document.getElementById('togglePreview');
+    let visible = false;
+
+    function renderPreview() {
+        if (visible && textarea) {
+            previewContent.innerHTML = marked.parse(textarea.value || '');
+        }
+    }
+
+    toggleBtn.addEventListener('click', function() {
+        visible = !visible;
+        preview.style.display = visible ? 'block' : 'none';
+        toggleBtn.textContent = visible ? '👁 Hide Preview' : '👁 Toggle Preview';
+        renderPreview();
+    });
+
+    if (textarea) {
+        textarea.addEventListener('input', renderPreview);
+    }
+})();
+</script>

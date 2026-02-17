@@ -5,11 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - ProfsMarkov Hub</title>
 
-    <meta property="og:type" content="website" />
+    <meta name="description" content="@(ViewData["OgDescription"] ?? "Gaming, tech, and code — by ProfsMarkov. Streams, reviews, and dev insights.")" />
+    <meta name="author" content="ProfsMarkov" />
+    <link rel="canonical" href="@(ViewData["OgUrl"] ?? Microsoft.AspNetCore.Http.Extensions.UriHelper.GetDisplayUrl(Context.Request))" />
+
+    <meta property="og:type" content="@(ViewData["OgType"] ?? "website")" />
     <meta property="og:title" content="@(ViewData["OgTitle"] ?? ViewData["Title"] ?? "ProfsMarkov Hub")" />
     <meta property="og:description" content="@(ViewData["OgDescription"] ?? "Gaming, tech, and code — by ProfsMarkov")" />
     <meta property="og:image" content="@(ViewData["OgImage"] ?? Url.Content("~/images/hero-bg.jpg"))" />
     <meta property="og:url" content="@(ViewData["OgUrl"] ?? Microsoft.AspNetCore.Http.Extensions.UriHelper.GetDisplayUrl(Context.Request))" />
+    <meta property="og:site_name" content="ProfsMarkov Hub" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@@ProfsMarkov" />
+    <meta name="twitter:title" content="@(ViewData["OgTitle"] ?? ViewData["Title"] ?? "ProfsMarkov Hub")" />
+    <meta name="twitter:description" content="@(ViewData["OgDescription"] ?? "Gaming, tech, and code — by ProfsMarkov")" />
+    <meta name="twitter:image" content="@(ViewData["OgImage"] ?? Url.Content("~/images/hero-bg.jpg"))" />
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/liquid_theme.css" asp-append-version="true" />

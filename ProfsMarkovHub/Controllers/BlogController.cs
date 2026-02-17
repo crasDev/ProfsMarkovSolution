@@ -2,33 +2,58 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProfsMarkovHub.Data;
 using ProfsMarkovHub.Helpers;
+using ProfsMarkovHub.ViewModels;
 
 namespace ProfsMarkovHub.Controllers;
 
 public class BlogController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private const int PageSize = 9;
 
     public BlogController(ApplicationDbContext context)
     {
         _context = context;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int page = 1, string? tag = null)
     {
         ViewData["OgTitle"] = "ProfsMarkov Blog";
         ViewData["OgDescription"] = "Latest posts, insights, and experiments from ProfsMarkov.";
         ViewData["OgImage"] = Url.Content("~/images/hero-bg.jpg");
         ViewData["OgUrl"] = Url.Action("Index", "Blog", null, Request.Scheme);
 
-        var articles = await _context.Articles
+        var query = _context.Articles
             .Include(a => a.Author)
             .Include(a => a.ArticleTags)
                 .ThenInclude(at => at.Tag)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(tag))
+        {
+            query = query.Where(a => a.ArticleTags.Any(at => at.Tag!.Name == tag));
+        }
+
+        var totalCount = await query.CountAsync();
+        var totalPages = (int)Math.Ceiling(totalCount / (double)PageSize);
+        page = Math.Clamp(page, 1, Math.Max(1, totalPages));
+
+        var articles = await query
             .OrderByDescending(a => a.PublishedAt)
+            .Skip((page - 1) * PageSize)
+            .Take(PageSize)
             .ToListAsync();
 
-        return View(articles);
+        var vm = new BlogIndexViewModel
+        {
+            Articles = articles,
+            CurrentPage = page,
+            TotalPages = totalPages,
+            PageSize = PageSize,
+            TagFilter = tag
+        };
+
+        return View(vm);
     }
 
     [Route("blog/{slug}")]
@@ -45,6 +70,7 @@ public class BlogController : Controller
 
         ViewData["Title"] = article.Title;
         ViewData["OgTitle"] = article.Title;
+        ViewData["OgType"] = "article";
         ViewData["OgDescription"] = !string.IsNullOrEmpty(article.Excerpt) 
             ? article.Excerpt 
             : (article.Content.Length > 180 ? article.Content[..180] + "..." : article.Content);
@@ -75,6 +101,7 @@ public class BlogController : Controller
 
         ViewData["Title"] = article.Title;
         ViewData["OgTitle"] = article.Title;
+        ViewData["OgType"] = "article";
         ViewData["OgDescription"] = !string.IsNullOrEmpty(article.Excerpt) 
             ? article.Excerpt 
             : (article.Content.Length > 180 ? article.Content[..180] + "..." : article.Content);
