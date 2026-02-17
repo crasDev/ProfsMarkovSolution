@@ -3,35 +3,34 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ProfsMarkovHub</title>
+    <title>@ViewData["Title"] - ProfsMarkov Hub</title>
 
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="@(ViewData["OgTitle"] ?? ViewData["Title"] ?? "ProfsMarkovHub")" />
-    <meta property="og:description" content="@(ViewData["OgDescription"] ?? "AI tools, streams and blog updates")" />
+    <meta property="og:title" content="@(ViewData["OgTitle"] ?? ViewData["Title"] ?? "ProfsMarkov Hub")" />
+    <meta property="og:description" content="@(ViewData["OgDescription"] ?? "Gaming, tech, and code — by ProfsMarkov")" />
     <meta property="og:image" content="@(ViewData["OgImage"] ?? Url.Content("~/images/hero-bg.jpg"))" />
     <meta property="og:url" content="@(ViewData["OgUrl"] ?? Microsoft.AspNetCore.Http.Extensions.UriHelper.GetDisplayUrl(Context.Request))" />
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/liquid_theme.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ProfsMarkovHub.styles.css" asp-append-version="true" />
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(145deg, rgba(0,102,255,0.7), rgba(0,204,102,0.7)); box-shadow: 0 4px 6px rgba(0,0,0,0.1), inset 0 -4px 6px rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
+        <nav class="navbar navbar-expand-lg navbar-glass">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">ProfsMarkovHub</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">ProfsMarkov</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item"><a class="nav-link text-white" asp-controller="Home" asp-action="Index">Home</a></li>
-                        <li class="nav-item"><a class="nav-link text-white" asp-controller="Blog" asp-action="Index">Blog</a></li>
-                        <li class="nav-item"><a class="nav-link text-white" asp-controller="Store" asp-action="Index">Store</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Blog" asp-action="Index">Blog</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Store" asp-action="Index">Store</a></li>
                         @if (User.Identity?.IsAuthenticated ?? false)
                         {
-                            <li class="nav-item"><a class="nav-link text-white" asp-controller="Admin" asp-action="Index">Admin</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Admin" asp-action="Index">Admin</a></li>
                         }
                     </ul>
                 </div>
@@ -45,9 +44,15 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted mt-4">
-        <div class="container">
-            &copy; 2026 - ProfsMarkovHub - <a asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="footer-glass">
+        <div class="container text-center">
+            <div class="footer-social">
+                <a href="https://www.twitch.tv/profs_markov" target="_blank" title="Twitch">🎮 Twitch</a>
+                <a href="https://bsky.app/profile/profsdk.bsky.social" target="_blank" title="Bluesky">🦋 Bluesky</a>
+                <a href="https://x.com/ProfsMarkov" target="_blank" title="X">𝕏 X.com</a>
+                <a href="https://github.com/crasDev" target="_blank" title="GitHub">💻 GitHub</a>
+            </div>
+            <p>&copy; 2026 ProfsMarkov Hub — Gaming, Tech &amp; Code</p>
         </div>
     </footer>
 

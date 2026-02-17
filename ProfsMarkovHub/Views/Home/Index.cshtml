@@ -4,24 +4,52 @@
     ViewData["Title"] = "Home";
 }
 
-<div class="hero rounded-4" style="background: linear-gradient(145deg, rgba(0,102,255,0.5), rgba(0,204,102,0.5)), url('/images/hero-bg.jpg'); background-size: cover; color: white; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7); padding: 60px; text-align: center;">
-    <h1 class="display-3">Welcome to ProfsMarkov Hub</h1>
-    <p>Your hub for AI tools, tech insights, and innovation.</p>
-</div>
-
-<div class="latest-blog container mt-5">
-    <h2 class="text-center">Latest from Blog</h2>
-    <div class="row mt-4 g-3">
-        @foreach (var article in Model)
-        {
-            <div class="col-md-4">
-                <div class="glass-card p-3 h-100">
-                    <img class="img-fluid rounded mb-2" style="height:180px;width:100%;object-fit:cover;" src="@(string.IsNullOrWhiteSpace(article.ImageUrl) ? "/images/blog-placeholder1.jpg" : article.ImageUrl)" alt="@article.Title">
-                    <h5>@article.Title</h5>
-                    <p class="text-muted">@article.PublishedAt.ToString("MMM dd, yyyy")</p>
-                    <a href="/Blog/Details/@article.Id" class="btn btn-primary">Read More</a>
-                </div>
-            </div>
-        }
+<div class="hero" style="background-image: linear-gradient(145deg, rgba(0,102,255,0.3), rgba(0,204,102,0.15)), url('/images/hero-bg.jpg'); background-size: cover; background-position: center;">
+    <h1>ProfsMarkov Hub</h1>
+    <p>Gaming reviews, tech deep-dives, and code experiments — live on Twitch.</p>
+    <div class="mt-3">
+        <a href="https://www.twitch.tv/profs_markov" target="_blank" class="btn btn-primary me-2">🎮 Watch Live</a>
+        <a asp-controller="Blog" asp-action="Index" class="btn btn-outline-light">📝 Read Blog</a>
     </div>
 </div>
+
+<section class="mb-5">
+    <h2 class="text-center mb-4" style="font-weight: 700; letter-spacing: -0.5px;">Latest Posts</h2>
+    <div class="blog-grid">
+        @foreach (var article in Model)
+        {
+            var wordCount = article.Content.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+            var readingTime = Math.Max(1, wordCount / 200);
+
+            <a asp-controller="Blog" asp-action="DetailsBySlug" asp-route-slug="@article.Slug" class="blog-card-link">
+                <div class="glass-card blog-card">
+                    @if (!string.IsNullOrWhiteSpace(article.ImageUrl))
+                    {
+                        <img src="@article.ImageUrl" class="blog-image" alt="@article.Title" />
+                    }
+                    else
+                    {
+                        <div class="blog-image-placeholder"><span>📝</span></div>
+                    }
+                    <div class="blog-card-body">
+                        <div class="blog-card-meta">
+                            <span class="blog-date">@article.PublishedAt.ToString("MMM dd, yyyy")</span>
+                            <span class="blog-reading-time">@readingTime min read</span>
+                        </div>
+                        <h3 class="blog-card-title">@article.Title</h3>
+                        <p class="blog-card-excerpt">
+                            @if (!string.IsNullOrEmpty(article.Excerpt))
+                            {
+                                @article.Excerpt
+                            }
+                            else
+                            {
+                                @(article.Content.Length > 120 ? article.Content[..120] + "..." : article.Content)
+                            }
+                        </p>
+                    </div>
+                </div>
+            </a>
+        }
+    </div>
+</section>
