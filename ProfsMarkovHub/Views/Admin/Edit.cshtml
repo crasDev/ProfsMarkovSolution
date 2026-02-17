@@ -1,53 +1,66 @@
-@model ProfsMarkovHub.Models.Article
+@model ProfsMarkovHub.ViewModels.ArticleFormViewModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Article";
 }
 
-<h1>Edit</h1>
-
-<h4>Article</h4>
+<h1>Edit Article</h1>
 <hr />
+
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-8">
         <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <input type="hidden" asp-for="PublishedAt" />
             <input type="hidden" asp-for="AuthorId" />
+
             <div class="form-group mb-3">
                 <label asp-for="Title" class="control-label"></label>
                 <input asp-for="Title" class="form-control" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
+
             <div class="form-group mb-3">
                 <label asp-for="Slug" class="control-label"></label>
                 <input asp-for="Slug" class="form-control" />
                 <span asp-validation-for="Slug" class="text-danger"></span>
             </div>
+
             <div class="form-group mb-3">
-                <label asp-for="Content" class="control-label"></label>
-                <textarea asp-for="Content" class="form-control" rows="10"></textarea>
+                <label asp-for="Excerpt" class="control-label">Excerpt / Summary</label>
+                <textarea asp-for="Excerpt" class="form-control" rows="2" placeholder="Short summary for cards and SEO..."></textarea>
+                <span asp-validation-for="Excerpt" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Content" class="control-label">Content (Markdown)</label>
+                <textarea asp-for="Content" class="form-control" rows="14"></textarea>
                 <span asp-validation-for="Content" class="text-danger"></span>
             </div>
+
             <div class="form-group mb-3">
-                <label asp-for="ImageUrl" class="control-label"></label>
-                <input asp-for="ImageUrl" class="form-control" />
-                <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                <label asp-for="TagsCsv" class="control-label">Tags</label>
+                <input asp-for="TagsCsv" class="form-control" placeholder="WoW, Horror, Indie, Tech" />
+                <small class="text-muted">Comma-separated. New tags are created automatically.</small>
             </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ImageUrl" class="control-label">Image URL</label>
+                <input asp-for="ImageUrl" class="form-control" />
+            </div>
+
             <div class="form-group mb-3">
                 <label for="imageFile" class="control-label">Upload New Image</label>
                 <input type="file" name="imageFile" id="imageFile" class="form-control" accept="image/*" />
             </div>
+
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-outline-light ms-2">Cancel</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
