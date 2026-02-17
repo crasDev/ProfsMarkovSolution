@@ -1,25 +1,32 @@
 {
   "format": 1,
   "restore": {
-    "/home/markov/.openclaw/workspace/ProfsMarkovSolution/ProfsMarkovHub/ProfsMarkovHub.csproj": {}
+    "C:\\Users\\crasd\\source\\repos\\crasDev\\ProfsMarkovSolution\\ProfsMarkovHub\\ProfsMarkovHub.csproj": {}
   },
   "projects": {
-    "/home/markov/.openclaw/workspace/ProfsMarkovSolution/ProfsMarkovHub/ProfsMarkovHub.csproj": {
+    "C:\\Users\\crasd\\source\\repos\\crasDev\\ProfsMarkovSolution\\ProfsMarkovHub\\ProfsMarkovHub.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/markov/.openclaw/workspace/ProfsMarkovSolution/ProfsMarkovHub/ProfsMarkovHub.csproj",
+        "projectUniqueName": "C:\\Users\\crasd\\source\\repos\\crasDev\\ProfsMarkovSolution\\ProfsMarkovHub\\ProfsMarkovHub.csproj",
         "projectName": "ProfsMarkovHub",
-        "projectPath": "/home/markov/.openclaw/workspace/ProfsMarkovSolution/ProfsMarkovHub/ProfsMarkovHub.csproj",
-        "packagesPath": "/home/markov/.nuget/packages/",
-        "outputPath": "/home/markov/.openclaw/workspace/ProfsMarkovSolution/ProfsMarkovHub/obj/",
+        "projectPath": "C:\\Users\\crasd\\source\\repos\\crasDev\\ProfsMarkovSolution\\ProfsMarkovHub\\ProfsMarkovHub.csproj",
+        "packagesPath": "C:\\Users\\crasd\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\crasd\\source\\repos\\crasDev\\ProfsMarkovSolution\\ProfsMarkovHub\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/home/markov/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\crasd\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -72,7 +79,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/home/markov/.dotnet/sdk/9.0.311/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
