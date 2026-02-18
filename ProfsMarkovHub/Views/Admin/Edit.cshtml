@@ -12,7 +12,6 @@
         <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="PublishedAt" />
             <input type="hidden" asp-for="AuthorId" />
 
             <div class="form-group mb-3">
@@ -57,6 +56,33 @@
                 <input type="file" name="imageFile" id="imageFile" class="form-control" accept="image/*" />
             </div>
 
+            <div class="form-group mb-3">
+                <label asp-for="Status" class="control-label">Status</label>
+                <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<ProfsMarkovHub.Models.ArticleStatus>()"></select>
+            </div>
+
+            <div class="form-group mb-3" id="scheduleGroup">
+                <label asp-for="ScheduledAt" class="control-label">Schedule (UTC)</label>
+                <input asp-for="ScheduledAt" type="datetime-local" class="form-control" />
+                <small class="text-muted">When Status is Scheduled, set the publish date/time.</small>
+            </div>
+
+            <fieldset class="mb-3">
+                <legend>SEO Overrides (optional)</legend>
+                <div class="form-group mb-2">
+                    <label asp-for="OgTitle" class="control-label"></label>
+                    <input asp-for="OgTitle" class="form-control" />
+                </div>
+                <div class="form-group mb-2">
+                    <label asp-for="OgDescription" class="control-label"></label>
+                    <textarea asp-for="OgDescription" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="form-group mb-2">
+                    <label asp-for="OgImageUrl" class="control-label"></label>
+                    <input asp-for="OgImageUrl" class="form-control" />
+                </div>
+            </fieldset>
+
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
                 <a asp-action="Index" class="btn btn-outline-light ms-2">Cancel</a>
@@ -67,4 +93,15 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        const statusSelect = document.getElementById('Status');
+        const scheduleGroup = document.getElementById('scheduleGroup');
+        function updateScheduleVisibility() {
+            if (statusSelect && scheduleGroup) {
+                scheduleGroup.style.display = statusSelect.value === 'Scheduled' ? 'block' : 'none';
+            }
+        }
+        statusSelect?.addEventListener('change', updateScheduleVisibility);
+        updateScheduleVisibility();
+    </script>
 }

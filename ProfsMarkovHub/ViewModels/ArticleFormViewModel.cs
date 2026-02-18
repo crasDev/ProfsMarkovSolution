@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using ProfsMarkovHub.Models;
 
 namespace ProfsMarkovHub.ViewModels;
 
@@ -22,9 +23,23 @@ public class ArticleFormViewModel
 
     public string? ImageUrl { get; set; }
 
-    public DateTime PublishedAt { get; set; } = DateTime.UtcNow;
+    public ArticleStatus Status { get; set; } = ArticleStatus.Draft;
+
+    public DateTime? PublishedAt { get; set; }
+
+    public DateTime? ScheduledAt { get; set; }
 
     public string? AuthorId { get; set; }
+
+    // SEO overrides
+    [MaxLength(200)]
+    public string? OgTitle { get; set; }
+
+    [MaxLength(300)]
+    public string? OgDescription { get; set; }
+
+    [MaxLength(500)]
+    public string? OgImageUrl { get; set; }
 
     /// <summary>Comma-separated tag names (e.g. "WoW, Horror, Indie")</summary>
     public string TagsCsv { get; set; } = string.Empty;
