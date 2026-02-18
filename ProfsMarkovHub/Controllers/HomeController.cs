@@ -27,7 +27,9 @@ public class HomeController : Controller
         var latest = await _context.Articles
             .Include(a => a.Author)
             .Include(a => a.ArticleTags).ThenInclude(at => at.Tag)
+            .Where(a => a.Status == ArticleStatus.Published && !a.IsDeleted)
             .OrderByDescending(x => x.PublishedAt)
+            .ThenByDescending(a => a.Id)
             .Take(6)
             .ToListAsync();
 

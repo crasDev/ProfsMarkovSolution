@@ -27,6 +27,7 @@ public class BlogController : Controller
             .Include(a => a.Author)
             .Include(a => a.ArticleTags)
                 .ThenInclude(at => at.Tag)
+            .Where(a => a.Status == ProfsMarkovHub.Models.ArticleStatus.Published && !a.IsDeleted)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(tag))
@@ -40,6 +41,7 @@ public class BlogController : Controller
 
         var articles = await query
             .OrderByDescending(a => a.PublishedAt)
+            .ThenByDescending(a => a.Id)
             .Skip((page - 1) * PageSize)
             .Take(PageSize)
             .ToListAsync();
@@ -69,14 +71,14 @@ public class BlogController : Controller
             return NotFound();
 
         ViewData["Title"] = article.Title;
-        ViewData["OgTitle"] = article.Title;
+        ViewData["OgTitle"] = string.IsNullOrWhiteSpace(article.OgTitle) ? article.Title : article.OgTitle;
         ViewData["OgType"] = "article";
-        ViewData["OgDescription"] = !string.IsNullOrEmpty(article.Excerpt) 
+        var derivedDesc = !string.IsNullOrEmpty(article.Excerpt) 
             ? article.Excerpt 
             : (article.Content.Length > 180 ? article.Content[..180] + "..." : article.Content);
-        ViewData["OgImage"] = string.IsNullOrWhiteSpace(article.ImageUrl) 
-            ? Url.Content("~/images/hero-bg.jpg") 
-            : article.ImageUrl;
+        ViewData["OgDescription"] = string.IsNullOrWhiteSpace(article.OgDescription) ? derivedDesc : article.OgDescription;
+        var fallbackImg = string.IsNullOrWhiteSpace(article.ImageUrl) ? Url.Content("~/images/hero-bg.jpg") : article.ImageUrl;
+        ViewData["OgImage"] = string.IsNullOrWhiteSpace(article.OgImageUrl) ? fallbackImg : article.OgImageUrl;
         ViewData["OgUrl"] = Url.Action("DetailsBySlug", "Blog", new { slug = article.Slug }, Request.Scheme);
 
         ViewData["RenderedContent"] = MarkdownHelper.ToHtml(article.Content);
@@ -100,14 +102,14 @@ public class BlogController : Controller
             return NotFound();
 
         ViewData["Title"] = article.Title;
-        ViewData["OgTitle"] = article.Title;
+        ViewData["OgTitle"] = string.IsNullOrWhiteSpace(article.OgTitle) ? article.Title : article.OgTitle;
         ViewData["OgType"] = "article";
-        ViewData["OgDescription"] = !string.IsNullOrEmpty(article.Excerpt) 
+        var derivedDesc = !string.IsNullOrEmpty(article.Excerpt) 
             ? article.Excerpt 
             : (article.Content.Length > 180 ? article.Content[..180] + "..." : article.Content);
-        ViewData["OgImage"] = string.IsNullOrWhiteSpace(article.ImageUrl) 
-            ? Url.Content("~/images/hero-bg.jpg") 
-            : article.ImageUrl;
+        ViewData["OgDescription"] = string.IsNullOrWhiteSpace(article.OgDescription) ? derivedDesc : article.OgDescription;
+        var fallbackImg = string.IsNullOrWhiteSpace(article.ImageUrl) ? Url.Content("~/images/hero-bg.jpg") : article.ImageUrl;
+        ViewData["OgImage"] = string.IsNullOrWhiteSpace(article.OgImageUrl) ? fallbackImg : article.OgImageUrl;
         ViewData["OgUrl"] = Url.Action("Details", "Blog", new { id = article.Id }, Request.Scheme);
 
         ViewData["RenderedContent"] = MarkdownHelper.ToHtml(article.Content);

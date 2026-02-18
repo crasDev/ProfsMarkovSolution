@@ -11,7 +11,7 @@
             <div class="blog-article" data-aos="fade-up">
                 <h1 class="blog-article-title">@Model.Title</h1>
                 <div class="blog-article-meta">
-                    <span class="blog-date">@Model.PublishedAt.ToString("MMMM dd, yyyy")</span>
+                    <span class="blog-date">@(Model.PublishedAt?.ToString("MMMM dd, yyyy") ?? "")</span>
                     @if (ViewData["ReadingTime"] != null)
                     {
                         <span class="blog-reading-time">@ViewData["ReadingTime"] min read</span>
@@ -41,7 +41,7 @@
         <header class="blog-article-header mb-4">
             <h1 class="blog-article-title">@Model.Title</h1>
             <div class="blog-article-meta">
-                <span class="blog-date">@Model.PublishedAt.ToString("MMMM dd, yyyy")</span>
+                <span class="blog-date">@(Model.PublishedAt?.ToString("MMMM dd, yyyy") ?? "")</span>
                 @if (ViewData["ReadingTime"] != null)
                 {
                     <span class="blog-reading-time">@ViewData["ReadingTime"] min read</span>

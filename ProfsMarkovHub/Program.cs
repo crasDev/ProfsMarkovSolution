@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ProfsMarkovHub.Data;
+using ProfsMarkovHub.Services;
 using ProfsMarkovHub.Services.Storage;
 using ProfsMarkovHub.Services.Store;
 
@@ -9,6 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddScoped<ISlugService, SlugService>();
+builder.Services.AddScoped<IPublishService, PublishService>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => 
 {

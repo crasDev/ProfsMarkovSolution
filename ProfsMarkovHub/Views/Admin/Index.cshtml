@@ -1,21 +1,53 @@
 @model IEnumerable<ProfsMarkovHub.Models.Article>
-
+@using ProfsMarkovHub.Models
 @{
     ViewData["Title"] = "Admin Dashboard";
 }
 
 <h1>Manage Articles</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Create New</a>
-</p>
+<form method="get" class="mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-auto">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+                <option value="">All</option>
+                @foreach (var st in Enum.GetNames(typeof(ArticleStatus))) {
+                    <option value="@st" selected="@(ViewBag.Status == st)">@st</option>
+                }
+            </select>
+        </div>
+        <div class="col-auto">
+            <label class="form-label">Tag</label>
+            <input type="text" name="tag" class="form-control" value="@ViewBag.Tag" placeholder="tag name or slug" />
+        </div>
+        <div class="col-auto">
+            <label class="form-label">Search</label>
+            <input type="text" name="q" class="form-control" value="@ViewBag.Q" placeholder="title or slug" />
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-light">Filter</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+        </div>
+        <div class="col-auto ms-auto">
+            <a asp-action="Create" class="btn btn-primary">Create New</a>
+            <form asp-action="AutoPublish" method="post" class="d-inline">
+                <button class="btn btn-success" type="submit">Run Auto Publish</button>
+            </form>
+        </div>
+    </div>
+</form>
 
+<form asp-action="Bulk" method="post">
 <table class="table">
     <thead>
         <tr>
+            <th><input type="checkbox" id="selectAll" /></th>
             <th>Title</th>
-            <th>Tags</th>
+            <th>Status</th>
+            <th>Scheduled</th>
             <th>Published</th>
+            <th>Tags</th>
             <th>Author</th>
             <th></th>
         </tr>
@@ -24,7 +56,11 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.Title</td>
+                <td><input type="checkbox" name="selectedIds" value="@item.Id" /></td>
+                <td>@item.Title<br /><small class="text-muted">/@item.Slug</small></td>
+                <td>@item.Status</td>
+                <td>@(item.ScheduledAt?.ToString("yyyy-MM-dd HH:mm") ?? "—")</td>
+                <td>@(item.PublishedAt?.ToString("yyyy-MM-dd HH:mm") ?? "—")</td>
                 <td>
                     @if (item.ArticleTags?.Any() == true)
                     {
@@ -38,7 +74,6 @@
                         <span class="text-muted">—</span>
                     }
                 </td>
-                <td>@item.PublishedAt.ToString("MMM dd, yyyy")</td>
                 <td>@(item.Author?.UserName ?? "—")</td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-light">Edit</a>
@@ -48,3 +83,21 @@
         }
     </tbody>
 </table>
+<div class="d-flex align-items-center gap-2">
+    <select name="actionType" class="form-select w-auto">
+        <option>Publish</option>
+        <option>Unpublish</option>
+        <option>Delete</option>
+    </select>
+    <button type="submit" class="btn btn-warning">Apply to selected</button>
+</div>
+</form>
+
+@section Scripts {
+<script>
+    const selectAll = document.getElementById('selectAll');
+    selectAll?.addEventListener('change', (e) => {
+        document.querySelectorAll('input[name="selectedIds"]').forEach(cb => cb.checked = selectAll.checked);
+    });
+</script>
+}

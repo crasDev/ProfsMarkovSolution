@@ -40,7 +40,7 @@
                     }
                     <div class="blog-card-body">
                         <div class="blog-card-meta">
-                            <span class="blog-date">@article.PublishedAt.ToString("MMM dd, yyyy")</span>
+                            <span class="blog-date">@(article.PublishedAt?.ToString("MMM dd, yyyy") ?? "")</span>
                             <span class="blog-reading-time">@readingTime min read</span>
                         </div>
                         <h3 class="blog-card-title">@article.Title</h3>

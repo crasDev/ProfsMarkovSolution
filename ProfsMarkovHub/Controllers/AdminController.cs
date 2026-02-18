@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProfsMarkovHub.Data;
 using ProfsMarkovHub.Models;
+using ProfsMarkovHub.Services;
 using ProfsMarkovHub.Services.Storage;
 using ProfsMarkovHub.ViewModels;
 
@@ -13,21 +14,43 @@ public class AdminController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly IAssetStorage _assetStorage;
+    private readonly ISlugService _slugService;
+    private readonly IPublishService _publishService;
 
-    public AdminController(ApplicationDbContext context, IAssetStorage assetStorage)
+    public AdminController(ApplicationDbContext context, IAssetStorage assetStorage, ISlugService slugService, IPublishService publishService)
     {
         _context = context;
         _assetStorage = assetStorage;
+        _slugService = slugService;
+        _publishService = publishService;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? status, string? tag, string? q, int page = 1, int pageSize = 10)
     {
-        var articles = await _context.Articles
+        var query = _context.Articles
             .Include(a => a.Author)
             .Include(a => a.ArticleTags).ThenInclude(at => at.Tag)
-            .OrderByDescending(a => a.PublishedAt)
-            .ToListAsync();
-        return View(articles);
+            .Where(a => !a.IsDeleted)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<ArticleStatus>(status, true, out var st))
+            query = query.Where(a => a.Status == st);
+
+        if (!string.IsNullOrWhiteSpace(tag))
+            query = query.Where(a => a.ArticleTags.Any(at => at.Tag != null && (at.Tag.Name == tag || at.Tag.Slug == tag)));
+
+        if (!string.IsNullOrWhiteSpace(q))
+            query = query.Where(a => a.Title.Contains(q) || a.Slug.Contains(q));
+
+        query = query.OrderByDescending(a => a.PublishedAt).ThenByDescending(a => a.Id);
+
+        var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+        ViewBag.Page = page;
+        ViewBag.PageSize = pageSize;
+        ViewBag.Status = status;
+        ViewBag.Tag = tag;
+        ViewBag.Q = q;
+        return View(items);
     }
 
     public IActionResult Create()
@@ -42,6 +65,15 @@ public class AdminController : Controller
         if (!ModelState.IsValid)
             return View(vm);
 
+        // Canonicalize/validate slug
+        if (string.IsNullOrWhiteSpace(vm.Slug)) vm.Slug = _slugService.GenerateSlug(vm.Title);
+        else vm.Slug = _slugService.GenerateSlug(vm.Slug);
+        if (!await _slugService.IsUniqueAsync(vm.Slug))
+        {
+            ModelState.AddModelError("Slug", "Slug already exists. Please choose another.");
+            return View(vm);
+        }
+
         var article = new Article
         {
             Title = vm.Title,
@@ -49,9 +81,13 @@ public class AdminController : Controller
             Content = vm.Content,
             Excerpt = vm.Excerpt,
             ImageUrl = vm.ImageUrl,
-            PublishedAt = DateTime.UtcNow,
-            AuthorId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            AuthorId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
+            OgTitle = vm.OgTitle,
+            OgDescription = vm.OgDescription,
+            OgImageUrl = vm.OgImageUrl
         };
+
+        _publishService.ApplyStatusTransition(article, vm.Status, vm.ScheduledAt);
 
         if (imageFile is { Length: > 0 })
         {
@@ -85,8 +121,13 @@ public class AdminController : Controller
             Content = article.Content,
             Excerpt = article.Excerpt,
             ImageUrl = article.ImageUrl,
+            Status = article.Status,
             PublishedAt = article.PublishedAt,
+            ScheduledAt = article.ScheduledAt,
             AuthorId = article.AuthorId,
+            OgTitle = article.OgTitle,
+            OgDescription = article.OgDescription,
+            OgImageUrl = article.OgImageUrl,
             TagsCsv = string.Join(", ", article.ArticleTags.Select(at => at.Tag?.Name ?? ""))
         };
 
@@ -103,13 +144,26 @@ public class AdminController : Controller
         var article = await _context.Articles.FindAsync(id);
         if (article == null) return NotFound();
 
+        // Slug validation
+        if (string.IsNullOrWhiteSpace(vm.Slug)) vm.Slug = _slugService.GenerateSlug(vm.Title);
+        else vm.Slug = _slugService.GenerateSlug(vm.Slug);
+        if (!await _slugService.IsUniqueAsync(vm.Slug, excludingArticleId: id))
+        {
+            ModelState.AddModelError("Slug", "Slug already exists. Please choose another.");
+            return View(vm);
+        }
+
         article.Title = vm.Title;
         article.Slug = vm.Slug;
         article.Content = vm.Content;
         article.Excerpt = vm.Excerpt;
         article.ImageUrl = vm.ImageUrl;
-        article.PublishedAt = vm.PublishedAt;
         article.AuthorId = vm.AuthorId;
+        article.OgTitle = vm.OgTitle;
+        article.OgDescription = vm.OgDescription;
+        article.OgImageUrl = vm.OgImageUrl;
+
+        _publishService.ApplyStatusTransition(article, vm.Status, vm.ScheduledAt);
 
         if (imageFile is { Length: > 0 })
         {
@@ -142,9 +196,43 @@ public class AdminController : Controller
         var article = await _context.Articles.FindAsync(id);
         if (article != null)
         {
-            _context.Articles.Remove(article);
+            article.IsDeleted = true;
             await _context.SaveChangesAsync();
         }
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Bulk(string actionType, int[] selectedIds)
+    {
+        if (selectedIds == null || selectedIds.Length == 0) return RedirectToAction(nameof(Index));
+        var items = await _context.Articles.Where(a => selectedIds.Contains(a.Id)).ToListAsync();
+        foreach (var a in items)
+        {
+            switch (actionType)
+            {
+                case "Publish":
+                    _publishService.ApplyStatusTransition(a, ArticleStatus.Published, null);
+                    break;
+                case "Unpublish":
+                    _publishService.ApplyStatusTransition(a, ArticleStatus.Draft, null);
+                    break;
+                case "Delete":
+                    a.IsDeleted = true;
+                    break;
+            }
+        }
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult AutoPublish()
+    {
+        var count = _publishService.AutoPublishDue();
+        TempData["Message"] = $"Auto-published {count} scheduled articles.";
         return RedirectToAction(nameof(Index));
     }
 

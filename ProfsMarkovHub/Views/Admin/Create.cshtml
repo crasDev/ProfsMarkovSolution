@@ -14,13 +14,14 @@
 
             <div class="form-group mb-3">
                 <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
+                <input asp-for="Title" class="form-control" id="titleInput" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
 
             <div class="form-group mb-3">
                 <label asp-for="Slug" class="control-label"></label>
-                <input asp-for="Slug" class="form-control" placeholder="auto-generated-from-title" />
+                <input asp-for="Slug" class="form-control" id="slugInput" placeholder="auto-generated-from-title" />
+                <small class="text-muted">You can edit the slug. It must be unique.</small>
                 <span asp-validation-for="Slug" class="text-danger"></span>
             </div>
 
@@ -54,6 +55,33 @@
                 <input type="file" name="imageFile" id="imageFile" class="form-control" accept="image/*" />
             </div>
 
+            <div class="form-group mb-3">
+                <label asp-for="Status" class="control-label">Status</label>
+                <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<ProfsMarkovHub.Models.ArticleStatus>()"></select>
+            </div>
+
+            <div class="form-group mb-3" id="scheduleGroup" style="display:none;">
+                <label asp-for="ScheduledAt" class="control-label">Schedule (UTC)</label>
+                <input asp-for="ScheduledAt" type="datetime-local" class="form-control" />
+                <small class="text-muted">When Status is Scheduled, set the publish date/time.</small>
+            </div>
+
+            <fieldset class="mb-3">
+                <legend>SEO Overrides (optional)</legend>
+                <div class="form-group mb-2">
+                    <label asp-for="OgTitle" class="control-label"></label>
+                    <input asp-for="OgTitle" class="form-control" />
+                </div>
+                <div class="form-group mb-2">
+                    <label asp-for="OgDescription" class="control-label"></label>
+                    <textarea asp-for="OgDescription" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="form-group mb-2">
+                    <label asp-for="OgImageUrl" class="control-label"></label>
+                    <input asp-for="OgImageUrl" class="form-control" />
+                </div>
+            </fieldset>
+
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
                 <a asp-action="Index" class="btn btn-outline-light ms-2">Cancel</a>
@@ -64,4 +92,29 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function slugify(text) {
+            return text.toLowerCase().trim()
+                .replace(/[\s_]+/g, '-')
+                .replace(/[^a-z0-9-]/g, '')
+                .replace(/-+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+        const titleInput = document.getElementById('titleInput');
+        const slugInput = document.getElementById('slugInput');
+        titleInput?.addEventListener('input', () => {
+            if (!slugInput.value || slugInput.value === '' || slugInput.value === 'auto-generated-from-title') {
+                slugInput.value = slugify(titleInput.value);
+            }
+        });
+        const statusSelect = document.getElementById('Status');
+        const scheduleGroup = document.getElementById('scheduleGroup');
+        function updateScheduleVisibility() {
+            if (statusSelect && scheduleGroup) {
+                scheduleGroup.style.display = statusSelect.value === 'Scheduled' ? 'block' : 'none';
+            }
+        }
+        statusSelect?.addEventListener('change', updateScheduleVisibility);
+        updateScheduleVisibility();
+    </script>
 }
